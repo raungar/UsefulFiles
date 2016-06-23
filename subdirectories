@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Cwd; #for getting path
+
+#-----------------------------------------------------#
+#	This file looks into all subdirectories
+#	And stores any nonysyn.vcf files into files.txt
+#	Easily adaptable to find specific files 
+#-----------------------------------------------------#
+
+
+
+my $root = getcwd; #set current directory
+
+opendir (DIR, $root) or die "ERROR: cannot open in $root";
+my @file_list = readdir(DIR); #read contents of directory into file_list
+closedir(DIR);
+
+open (STDOUT, '>', "files.txt"); #print everything to files.txt
+
+foreach my $file (@file_list){
+
+	my $first_char = substr $file, 0, 1;
+
+	if ($first_char =~ /\./){
+		#Do not show hidden directories or files
+	}
+	elsif (-d $file){ #finds subdirectories
+		my $new_root = "$root/$file"; 
+		opendir (DIR, $new_root);
+		my @new_file_list = readdir(DIR); #stores contents of subdirectory into new_file_list
+		closedir(DIR);
+
+		foreach my $new_file (@new_file_list){
+			my $new_first_char = substr $new_file, 0, 1;
+
+			if ($new_first_char =~ /\./){
+				#Do not show hidden directories or files
+			}
+			elsif (-f $new_file){
+				#do nothing
+			}
+			elsif ($new_file =~ /nonsyn\.vcf/){ #print all nonsyn.vcf files 
+				print "$file/",$new_file, "\n";
+			}
+			else{
+				#do nothing			
+			}
+		}
+	}
+	else{
+		#Do nothing if it isn't a subdirectory
+	}
+}
+close (STDOUT);
+exit;
